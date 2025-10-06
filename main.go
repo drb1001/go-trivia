@@ -17,11 +17,17 @@ func main() {
 	fmt.Println("──────────────────────────────────────────────")
 
 	for {
-		// Load high score from file
-		highScore := trivia.LoadHighScore("data/highscore.json")
-		fmt.Printf("%sCurrent High Score:%s %s%d%s\n\n",
-			trivia.ColorYellow, trivia.ColorReset,
-			trivia.ColorGreen, highScore, trivia.ColorReset)
+		// Load high score (now returns name and score)
+		highName, highScore := trivia.LoadHighScore("data/highscore.json")
+		if highScore > 0 {
+			fmt.Printf("%sCurrent High Score:%s %s%d%s (by %s)\n\n",
+				trivia.ColorYellow, trivia.ColorReset,
+				trivia.ColorGreen, highScore, trivia.ColorReset, highName)
+		} else {
+			fmt.Printf("%sCurrent High Score:%s %s%d%s\n\n",
+				trivia.ColorYellow, trivia.ColorReset,
+				trivia.ColorGreen, 0, trivia.ColorReset)
+		}
 
 		// Fetch questions
 		fmt.Println(trivia.ColorCyan + "Fetching questions..." + trivia.ColorReset)
@@ -67,9 +73,20 @@ func main() {
 		// Update high score if beaten
 		if score > highScore {
 			fmt.Println(trivia.ColorYellow + "🎉 New High Score! 🎉" + trivia.ColorReset)
-			trivia.SaveHighScore("data/highscore.json", score)
+			// Prompt for name
+			fmt.Print("Enter your name to record the high score: ")
+			nameInput, _ := reader.ReadString('\n')
+			name := strings.TrimSpace(nameInput)
+			if name == "" {
+				name = "Anonymous"
+			}
+			if err := trivia.SaveHighScore("data/highscore.json", name, score); err != nil {
+				fmt.Printf("Error saving high score: %v\n", err)
+			} else {
+				fmt.Printf("Saved high score: %s - %d\n", name, score)
+			}
 		} else {
-			fmt.Printf("High Score remains: %d\n", highScore)
+			fmt.Printf("High Score remains: %d (by %s)\n", highScore, highName)
 		}
 
 		// Ask to play again

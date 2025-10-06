@@ -6,36 +6,43 @@ import (
 	"os"
 )
 
-// HighScoreData represents the JSON structure for high score file
+// HighScoreData represents the stored high score with player's name
 type HighScoreData struct {
-	HighScore int `json:"highscore"`
+	Name      string `json:"name"`
+	HighScore int    `json:"highscore"`
 }
 
 // LoadHighScore reads the high score from a file
-func LoadHighScore(filename string) int {
-	file, err := os.Open(filename)
+func LoadHighScore(filename string) (string, int) {
+	plain, err := os.ReadFile(filename)
 	if err != nil {
-		// If file doesn’t exist, return 0
-		return 0
-	}
-	defer file.Close()
-
+		// file missing -> no highscore yet
+		return "", 0
+	}	
+	
+// parse JSON
 	var data HighScoreData
-	if err := json.NewDecoder(file).Decode(&data); err != nil {
-		return 0
+	if err := json.Unmarshal(plain, &data); err != nil {
+		return "", 0
 	}
-	return data.HighScore
+
+	return data.Name, data.HighScore
 }
 
 // SaveHighScore writes the high score to a file
-func SaveHighScore(filename string, score int) {
-	data := HighScoreData{HighScore: score}
-	file, err := os.Create(filename)
-	if err != nil {
-		fmt.Printf("Error saving high score: %v\n", err)
-		return
+func SaveHighScore(filename string, name string, score int) error {
+	data := HighScoreData{
+		Name:      name,
+		HighScore: score,
 	}
-	defer file.Close()
+	plain, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal highscore json: %w", err)
+	}
+	// write to file
+	if err := os.WriteFile(filename, []byte(plain), 0644); err != nil {
+		return fmt.Errorf("failed to write highscore file: %w", err)
+	}
 
-	_ = json.NewEncoder(file).Encode(data)
+	return nil
 }
