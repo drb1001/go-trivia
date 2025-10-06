@@ -93,7 +93,42 @@ Current Streak: 1
 ```
 
 
-## File Structure
+## Development Workflow 
+
+### Running Tests
+
+Go has a built-in testing framework that makes it easy to run both unit tests and integration tests.
+
+> [NOTE!]
+> Running tests is safe and read-only — your actual game highscores are not affected by the test suite.
+
+To run all unit tests:
+
+```powershell
+go test ./trivia -v
+```
+
+Example output:
+```powershell
+
+=== RUN   TestPrepare
+--- PASS: TestPrepare (0.00s)
+=== RUN   TestCheckAnswer
+--- PASS: TestCheckAnswer (0.00s)
+PASS
+ok      go-trivia/trivia 0.012s
+```
+
+
+### Check Test Coverage (Optional)
+
+To see which lines of code are covered by tests:
+
+```powershell
+go test -cover ./trivia
+```
+
+### File Structure
 
 ```
 go-trivia/
