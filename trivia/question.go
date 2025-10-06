@@ -6,30 +6,37 @@ import (
 	"time"
 )
 
+// ANSI color codes (work on most terminals)
+const (
+	ColorReset  = "\033[0m"
+	ColorBold   = "\033[1m"
+	ColorGreen  = "\033[32m"
+	ColorRed    = "\033[31m"
+	ColorYellow = "\033[33m"
+	ColorCyan   = "\033[36m"
+)
+
 // Question represents a single trivia question
 type Question struct {
-	Text            string   // The actual question text
-	CorrectAnswer   string   // The correct answer
-	IncorrectAnswers []string // List of wrong answers
-	ShuffledChoices []string // All answers combined + shuffled
-	CorrectIndex    int      // Position of the correct answer after shuffle
+	Text            string
+	CorrectAnswer   string
+	IncorrectAnswers []string
+	ShuffledChoices []string
+	CorrectIndex    int
+	Category        string
+	Difficulty      string
 }
 
-// Prepare mixes up answers and assigns labels A, B, C, ...
+// Prepare mixes up answers and assigns labels
 func (q *Question) Prepare() {
-	// Combine correct + incorrect answers
 	allAnswers := append([]string{q.CorrectAnswer}, q.IncorrectAnswers...)
 
-	// Shuffle answers
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(allAnswers), func(i, j int) {
 		allAnswers[i], allAnswers[j] = allAnswers[j], allAnswers[i]
 	})
 
-	// Store shuffled list
 	q.ShuffledChoices = allAnswers
-
-	// Find index of the correct answer
 	for i, choice := range allAnswers {
 		if choice == q.CorrectAnswer {
 			q.CorrectIndex = i
@@ -38,23 +45,25 @@ func (q *Question) Prepare() {
 	}
 }
 
-// Display prints the question and its choices to the console
+// Display prints the question neatly
 func (q *Question) Display() {
-	fmt.Println("\nQuestion:")
-	fmt.Println(q.Text)
-	fmt.Println("Choices:")
-
 	labels := []string{"A", "B", "C", "D"}
+
+	fmt.Printf("\n%s───────────────────────────────%s\n", ColorCyan, ColorReset)
+	fmt.Printf("%sCategory:%s %s | %sDifficulty:%s %s\n",
+		ColorYellow, ColorReset, q.Category, ColorYellow, ColorReset, q.Difficulty)
+	fmt.Printf("%sQ:%s %s\n", ColorBold, ColorReset, q.Text)
+	fmt.Println("")
+
 	for i, choice := range q.ShuffledChoices {
-		fmt.Printf("%s) %s\n", labels[i], choice)
+		fmt.Printf("  %s%s)%s %s\n", ColorCyan, labels[i], ColorReset, choice)
 	}
+	fmt.Printf("%s───────────────────────────────%s\n", ColorCyan, ColorReset)
 }
 
 // CheckAnswer validates if the given label is correct
 func (q *Question) CheckAnswer(label string) bool {
 	labels := []string{"A", "B", "C", "D"}
-
-	// Convert label to index
 	for i, l := range labels {
 		if l == label {
 			return i == q.CorrectIndex

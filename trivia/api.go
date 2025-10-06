@@ -49,12 +49,14 @@ func FetchQuestions(amount int) ([]Question, error) {
 
 	// Convert API results into our Question struct
 	var questions []Question
-	for _, q := range apiResp.Results {
-		question := Question{
-			Text:            html.UnescapeString(q.Question),
-			CorrectAnswer:   html.UnescapeString(q.CorrectAnswer),
-			IncorrectAnswers: unescapeList(q.IncorrectAnswers),
-		}
+for _, q := range apiResp.Results {
+	question := Question{
+		Text:             html.UnescapeString(q.Question),
+		CorrectAnswer:    html.UnescapeString(q.CorrectAnswer),
+		IncorrectAnswers: unescapeList(q.IncorrectAnswers),
+		Category:         html.UnescapeString(q.Category),
+		Difficulty:       html.UnescapeString(q.Difficulty),
+	}
 		question.Prepare()
 		questions = append(questions, question)
 	}

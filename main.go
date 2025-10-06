@@ -11,14 +11,20 @@ import (
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Welcome to Go Trivia!")
+
+	// Colored welcome message
+	fmt.Printf("%s%sWelcome to Go Trivia!%s 🎯\n", trivia.ColorBold, trivia.ColorCyan, trivia.ColorReset)
+	fmt.Println("──────────────────────────────────────────────")
 
 	for {
-		// Load high score
+		// Load high score from file
 		highScore := trivia.LoadHighScore("data/highscore.json")
-		fmt.Printf("Current High Score: %d\n\n", highScore)
+		fmt.Printf("%sCurrent High Score:%s %s%d%s\n\n",
+			trivia.ColorYellow, trivia.ColorReset,
+			trivia.ColorGreen, highScore, trivia.ColorReset)
 
-		// Fetch 5 questions
+		// Fetch questions
+		fmt.Println(trivia.ColorCyan + "Fetching questions..." + trivia.ColorReset)
 		questions, err := trivia.FetchQuestions(5)
 		if err != nil {
 			log.Fatalf("Error fetching questions: %v", err)
@@ -26,7 +32,7 @@ func main() {
 
 		score := 0
 
-		// Gameplay loop
+		// Game loop
 		for _, q := range questions {
 			q.Display()
 
@@ -37,35 +43,38 @@ func main() {
 
 			// Check if correct
 			if q.CheckAnswer(input) {
-				fmt.Println("✅ Correct!")
+				fmt.Println(trivia.ColorGreen + "✅ Correct!" + trivia.ColorReset)
 				score++
 				fmt.Printf("Current Streak: %d\n\n", score)
 			} else {
-				fmt.Printf("❌ Wrong! The correct answer was: %s\n", q.CorrectAnswer)
+				fmt.Println(trivia.ColorRed + "❌ Wrong!" + trivia.ColorReset)
+				fmt.Printf("The correct answer was: %s\n", q.CorrectAnswer)
 				break
 			}
 		}
 
-		fmt.Printf("\nGame over! Your final score: %d\n", score)
+		fmt.Printf("\n%sGame over!%s Your final score: %s%d%s\n",
+			trivia.ColorBold, trivia.ColorReset, trivia.ColorGreen, score, trivia.ColorReset)
 
-		// Update highscore if beaten
+		// Update high score if beaten
 		if score > highScore {
-			fmt.Println("🎉 New High Score!")
+			fmt.Println(trivia.ColorYellow + "🎉 New High Score! 🎉" + trivia.ColorReset)
 			trivia.SaveHighScore("data/highscore.json", score)
 		} else {
 			fmt.Printf("High Score remains: %d\n", highScore)
 		}
 
-		// Ask if user wants to play again
+		// Ask to play again
 		fmt.Print("\nPlay again? (y/n): ")
 		answer, _ := reader.ReadString('\n')
 		answer = strings.TrimSpace(strings.ToLower(answer))
 
 		if answer != "y" && answer != "yes" {
-			fmt.Println("Thanks for playing Go Trivia! 👋")
+			fmt.Println("\n" + trivia.ColorCyan + "Thanks for playing Go Trivia! 👋" + trivia.ColorReset)
 			break
 		}
 
-		fmt.Println("\n🔁 Starting a new game...\n")
+		fmt.Println("\n" + trivia.ColorYellow + "🔁 Starting a new game..." + trivia.ColorReset)
+		fmt.Println("──────────────────────────────────────────────")
 	}
 }
