@@ -36,10 +36,18 @@ func main() {
 		for _, q := range questions {
 			q.Display()
 
-			// Get user input
-			fmt.Print("\nYour answer (A/B/C/D): ")
-			input, _ := reader.ReadString('\n')
-			input = strings.TrimSpace(strings.ToUpper(input))
+			var input string
+			for {
+				fmt.Print("\nYour answer (A/B/C/D): ")
+				userInput, _ := reader.ReadString('\n')
+				input = strings.TrimSpace(strings.ToUpper(userInput))
+
+				if input == "A" || input == "B" || input == "C" || input == "D" {
+					break
+				}
+
+				fmt.Println(trivia.ColorYellow + "⚠️  Please enter only A, B, C, or D." + trivia.ColorReset)
+			}
 
 			// Check if correct
 			if q.CheckAnswer(input) {
