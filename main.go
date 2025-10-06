@@ -17,8 +17,20 @@ func main() {
 	fmt.Println("──────────────────────────────────────────────")
 
 	for {
-		// Load high score (now returns name and score)
-		highName, highScore := trivia.LoadHighScore("data/highscore.json")
+		// Load high score and ensure secret key exists
+		highName, highScore, err := trivia.LoadHighScore("data/highscore.json")
+		if err != nil {
+			// Friendly error and instructions on how to create config
+			configPath, _ := func() (string, error) { return trivia.GetConfigPathForUser() }()
+			msg := fmt.Sprintf("ERROR: %v\n\n"+
+				"Please create a config file with a secret key used for obfuscation of highscores.\n"+
+				"Create it at: %s\n"+
+				"Example content:  { \"secret_key\": \"ExampleSecretKey\" }\n\n", 
+				err, configPath)
+			
+			log.Fatalf(msg)
+		}
+
 		if highScore > 0 {
 			fmt.Printf("%sCurrent High Score:%s %s%d%s (by %s)\n\n",
 				trivia.ColorYellow, trivia.ColorReset,
@@ -70,9 +82,10 @@ func main() {
 		fmt.Printf("\n%sGame over!%s Your final score: %s%d%s\n",
 			trivia.ColorBold, trivia.ColorReset, trivia.ColorGreen, score, trivia.ColorReset)
 
-		// Update high score if beaten
+		// Update highscore if beaten
 		if score > highScore {
 			fmt.Println(trivia.ColorYellow + "🎉 New High Score! 🎉" + trivia.ColorReset)
+
 			// Prompt for name
 			fmt.Print("Enter your name to record the high score: ")
 			nameInput, _ := reader.ReadString('\n')
@@ -80,6 +93,8 @@ func main() {
 			if name == "" {
 				name = "Anonymous"
 			}
+
+			// Save obfuscated highscore
 			if err := trivia.SaveHighScore("data/highscore.json", name, score); err != nil {
 				fmt.Printf("Error saving high score: %v\n", err)
 			} else {
