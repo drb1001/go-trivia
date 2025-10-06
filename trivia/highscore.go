@@ -34,14 +34,9 @@ func GetConfigPathForUser() (string, error) {
 	return getConfigPath()
 }
 
-// loadSecretKey loads the obfuscation key from config.json
-// Returns an error if the config file does not exist or is invalid.
-func loadSecretKey() ([]byte, error) {
-	configPath, err := getConfigPath()
-	if err != nil {
-		return nil, err
-	}
-
+// loadSecretKeyFromPath loads the obfuscation key from the given config path.
+// Returns an error if the file does not exist or is invalid.
+func loadSecretKeyFromPath(configPath string) ([]byte, error) {
 	content, err := os.ReadFile(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -59,6 +54,15 @@ func loadSecretKey() ([]byte, error) {
 	}
 
 	return []byte(cfg.SecretKey), nil
+}
+
+
+func loadSecretKey() ([]byte, error) {
+	configPath, err := getConfigPath()
+	if err != nil {
+		return nil, err
+	}
+	return loadSecretKeyFromPath(configPath)
 }
 
 // LoadHighScore reads the (obfuscated) high score file and returns name and score.
